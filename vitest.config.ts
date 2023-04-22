@@ -1,10 +1,9 @@
-import {defineConfig} from "vitest/config";
+import { defineConfig } from "vitest/config";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-    plugins: [tsconfigPaths()],
-    test: {
-        globals: true,
-        setupFiles: ["./setup-test-env.ts"],
-    },
+  plugins: [tsconfigPaths()],
+  test: {
+    setupFiles: ["./setup-test-env.ts"],
+  },
 });
