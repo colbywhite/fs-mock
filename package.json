@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build": "tsc",
-    "start": "ts-node src/index.ts"
+    "clean": "rimraf dist/*",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +16,9 @@
     "@types/node": "^18.15.13",
     "rimraf": "^5.0.0",
     "ts-node": "^10.4.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.30.1"
   },
-  "dependencies": {
-    "dotenv": "^16.0.3"
-  }
+  "dependencies": {}
 }
