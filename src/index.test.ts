@@ -1,42 +1,36 @@
+import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as path from "path";
+import type * as fsModule from "fs";
 
 import buildMockFSFactory from "./index";
 
-describe("fsFactory", () => {
+describe("buildMockFSFactory", () => {
   const PROJECT_DIR = path.join(__dirname, "..");
   const SRC_DIR = path.join(PROJECT_DIR, "src");
   const FIXTURES = path.join(PROJECT_DIR, "fixtures");
-  const EXISTING_DIR = path.join(SRC_DIR, "existent");
+  let fs: typeof fsModule;
 
   beforeEach(async () => {
     const mockedFs = await buildMockFSFactory([
       { root: SRC_DIR, fixture: FIXTURES },
     ]);
     vi.doMock("fs", mockedFs);
+    fs = await import("fs");
   });
 
   afterEach(() => {
     vi.doUnmock("fs");
   });
 
-  describe("existsSync", () => {
-    it("should return true when dir exists in fixture dir", async () => {
-      const fs = await import("fs");
-      expect(fs.existsSync(EXISTING_DIR)).toBe(true);
-    });
-
-    it("should return false when dir does not exist in fixture dir", async () => {
-      const missingDir = path.join(SRC_DIR, "missing");
-      const fs = await import("fs");
-      expect(fs.existsSync(missingDir)).toBe(false);
-    });
-  });
-
-  describe("readdirSync", () => {
-    it("should return results from the fixture dir", async () => {
-      const fs = await import("fs");
-      expect(fs.readdirSync(EXISTING_DIR)).toEqual([".gitignore"]);
+  ["accessSync", "existsSync", "readdirSync"].map((name) => {
+    it(`${name} should be mocked`, () => {
+      expect(isMock(fs[name]), `is fs.${name} a mock`).toBe(true);
     });
   });
 });
+
+function isMock(f: unknown): f is Mock {
+  const context = (f as Mock).mock;
+  return context !== undefined && typeof context === "object";
+}

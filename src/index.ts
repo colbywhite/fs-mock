@@ -1,5 +1,6 @@
 import type * as fs from "fs";
-import { PathFunction, wrap } from "./utils";
+import type { PathFunction } from "./utils";
+import { wrap } from "./utils";
 import { FS_FUNCTIONS_TO_MOCK } from "./constants";
 import type { Mock } from "vitest";
 
