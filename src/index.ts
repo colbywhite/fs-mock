@@ -1,13 +1,23 @@
 import type * as fs from "fs";
-import { wrap } from "./utils";
+import { PathFunction, wrap } from "./utils";
+import { FS_FUNCTIONS_TO_MOCK } from "./constants";
+import type { Mock } from "vitest";
 
 export default async function buildMockFSFactory(
   configs: { root: string; fixture: string }[] = []
-): Promise<() => typeof fs> {
+) {
   const original = await import("fs");
-  return () => ({
-    ...original,
-    existsSync: wrap(configs, original.existsSync),
-    readdirSync: wrap(configs, original.readdirSync),
-  });
+  const mockedFs: Partial<Record<(typeof FS_FUNCTIONS_TO_MOCK)[number], Mock>> =
+    {};
+  for (const key of FS_FUNCTIONS_TO_MOCK) {
+    if (typeof original[key] === "function" && original[key].length >= 1) {
+      mockedFs[key] = wrap(configs, original[key] as PathFunction);
+    }
+  }
+
+  return () =>
+    ({
+      ...original,
+      ...mockedFs,
+    } as typeof fs);
 }
