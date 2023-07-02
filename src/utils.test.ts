@@ -63,4 +63,13 @@ describe("wrap", () => {
     expect(toWrap).toBeCalledTimes(1);
     expect(toWrap).lastCalledWith(buffer);
   });
+
+  it("should ignore swapping when the path is a file descriptor", () => {
+    const toWrap = vi.fn().mockImplementation(NO_OP);
+    const wrapped = wrap(config, toWrap);
+    const fd = 0;
+    wrapped(fd);
+    expect(toWrap).toBeCalledTimes(1);
+    expect(toWrap).lastCalledWith(fd);
+  });
 });

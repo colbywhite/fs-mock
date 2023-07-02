@@ -1,9 +1,9 @@
-import type { PathLike } from "fs";
+import type { PathOrFileDescriptor } from "fs";
 import { vi } from "vitest";
 
 function swapRoots(
   configs: { root: string; fixture: string }[],
-  path: PathLike
+  path: PathOrFileDescriptor
 ) {
   if (typeof path === "string") {
     const config = configs.find(({ root }) => path.startsWith(root));
@@ -15,10 +15,10 @@ function swapRoots(
 }
 
 type PathFunctionWithArguments<R = void, A = unknown> = (
-  path: PathLike,
+  path: PathOrFileDescriptor,
   ...args: A[]
 ) => R;
-type PathFunctionWithoutArguments<R = void> = (path: PathLike) => R;
+type PathFunctionWithoutArguments<R = void> = (path: PathOrFileDescriptor) => R;
 export type PathFunction<R = void, A = unknown> =
   | PathFunctionWithArguments<R, A>
   | PathFunctionWithoutArguments<R>;
@@ -33,12 +33,12 @@ export function wrap<R, A = unknown>(
   return func.length === 1
     ? vi
         .fn()
-        .mockImplementation((oldPath: PathLike) =>
+        .mockImplementation((oldPath: PathOrFileDescriptor) =>
           func(swapRoots(configs, oldPath))
         )
     : vi
         .fn()
-        .mockImplementation((oldPath: PathLike, ...args: A[]) =>
+        .mockImplementation((oldPath: PathOrFileDescriptor, ...args: A[]) =>
           func(swapRoots(configs, oldPath), ...args)
         );
 }

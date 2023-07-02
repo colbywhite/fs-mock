@@ -1,6 +1,8 @@
 export const FS_FUNCTIONS_TO_MOCK = [
   "access",
   "accessSync",
+  "appendFile",
+  "appendFileSync",
   "chown",
   "chownSync",
   "chmod",
@@ -27,6 +29,8 @@ export const FS_FUNCTIONS_TO_MOCK = [
   "opendirSync",
   "readdir",
   "readdirSync",
+  "readFile",
+  "readFileSync",
   "readlink",
   "readlinkSync",
   "realpath",
@@ -48,4 +52,6 @@ export const FS_FUNCTIONS_TO_MOCK = [
   "utimesSync",
   "watch",
   "watchFile",
+  "writeFile",
+  "writeFileSync",
 ] as const;

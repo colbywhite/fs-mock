@@ -26,6 +26,8 @@ describe("buildMockFSFactory", () => {
   [
     "access",
     "accessSync",
+    "appendFile",
+    "appendFileSync",
     "chown",
     "chownSync",
     "chmod",
@@ -52,6 +54,8 @@ describe("buildMockFSFactory", () => {
     "opendirSync",
     "readdir",
     "readdirSync",
+    "readFile",
+    "readFileSync",
     "readlink",
     "readlinkSync",
     "realpath",
@@ -73,6 +77,8 @@ describe("buildMockFSFactory", () => {
     "utimesSync",
     "watch",
     "watchFile",
+    "writeFile",
+    "writeFileSync",
   ].map((name) => {
     it(`${name} should be mocked`, () => {
       expect(isMock(fs[name]), `is fs.${name} a mock`).toBe(true);
