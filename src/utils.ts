@@ -1,5 +1,7 @@
-import type { PathOrFileDescriptor } from "fs";
+import type { PathLike, PathOrFileDescriptor } from "fs";
+import type { Mock } from "vitest";
 import { vi } from "vitest";
+import path from "path";
 
 function swapRoots(
   configs: { root: string; fixture: string }[],
@@ -14,31 +16,44 @@ function swapRoots(
   return path;
 }
 
-type PathFunctionWithArguments<R = void, A = unknown> = (
-  path: PathOrFileDescriptor,
-  ...args: A[]
-) => R;
-type PathFunctionWithoutArguments<R = void> = (path: PathOrFileDescriptor) => R;
-export type PathFunction<R = void, A = unknown> =
-  | PathFunctionWithArguments<R, A>
-  | PathFunctionWithoutArguments<R>;
+function isPath(val: unknown): val is PathLike {
+  return (
+    val !== undefined &&
+    val !== null &&
+    typeof val === "string" &&
+    (path.isAbsolute(val) ||
+      val.includes(path.sep) ||
+      val.includes(".") ||
+      val.includes(".."))
+  );
+}
+
+function trimUndefinedValues<A = unknown>(...args: A[]) {
+  return args.filter((a) => a !== undefined);
+}
 
 /**
  * Wraps a given function's path parameter based on the given config.
  */
-export function wrap<R, A = unknown>(
+export function wrap<F extends (...args: unknown[]) => R, R>(
   configs: { root: string; fixture: string }[],
-  func: PathFunction<R, A>
-) {
-  return func.length === 1
-    ? vi
-        .fn()
-        .mockImplementation((oldPath: PathOrFileDescriptor) =>
-          func(swapRoots(configs, oldPath))
-        )
-    : vi
-        .fn()
-        .mockImplementation((oldPath: PathOrFileDescriptor, ...args: A[]) =>
-          func(swapRoots(configs, oldPath), ...args)
-        );
+  func: F
+): Mock<Parameters<F>, ReturnType<F>> {
+  // TODO throw error for unexpected function names
+  if (typeof func !== "function") {
+    throw new Error("wrap was not passed a function");
+  }
+  const implementation = (
+    argOne: unknown,
+    argTwo: unknown,
+    ...extraArgs: unknown[]
+  ) => {
+    const newArgOne = isPath(argOne) ? swapRoots(configs, argOne) : argOne;
+    const newArgTwo = isPath(argTwo) ? swapRoots(configs, argTwo) : argTwo;
+    return func(...trimUndefinedValues(newArgOne, newArgTwo, ...extraArgs));
+  };
+  return vi.fn(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    implementation as any as (...args: Parameters<F>) => ReturnType<F>
+  );
 }
